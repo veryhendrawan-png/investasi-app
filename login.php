@@ -1,23 +1,38 @@
 <?php
 session_start();
-require 'config/koneksi.php';
 
 if (isset($_SESSION['login'])) {
     header("Location: index.php");
     exit;
 }
 
-if (isset($_POST['login'])) {
-    $username = $_POST['username'];
+require_once 'config/koneksi.php';
+
+$error = false;
+
+if (isset($_POST['submit'])) {
+    $username = mysqli_real_escape_string($koneksi, $_POST['username']);
     $password = $_POST['password'];
 
-    if ($username === 'admin' && $password === 'admin123') {
-        $_SESSION['login'] = true;
-        $_SESSION['user'] = $username;
-        header("Location: index.php");
-        exit;
+    // QUERY DATABASE ASLI TIM KELOMPOK
+    $query = "SELECT * FROM users WHERE username = '$username'";
+    $result = mysqli_query($koneksi, $query);
+
+    if ($result && mysqli_num_rows($result) === 1) {
+        $row = mysqli_fetch_assoc($result);
+
+        // Membaca kueri password database asli secara langsung
+        if ($password === $row['password']) {
+            $_SESSION['login'] = true;
+            $_SESSION['user'] = $row['username'];
+            header("Location: index.php");
+            exit;
+        } else {
+            $error = true;
+        }
+    } else {
+        $error = true;
     }
-    $error = true;
 }
 ?>
 <!DOCTYPE html>
@@ -25,31 +40,38 @@ if (isset($_POST['login'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Investasi Barang</title>
+    <title>Login - Aplikasi Investasi Barang</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <div class="auth-container">
-        <h1 class="text-center" style="margin-bottom: 5px; color: #2ecc71; font-size: 28px; font-weight: bold;">IB</h1>
-        <p class="text-center" style="color: #9ca3af; font-size: 14px; margin-bottom: 25px;">Aplikasi Investasi Barang</p>
-        
-        <?php if (isset($error)) : ?>
-            <p style="color: #ef4444; text-align: center; margin-bottom: 15px; font-weight: bold;">
-                Username atau Password Salah!
-            </p>
+
+    <!-- Tombol Sakelar Tema -->
+    <div style="text-align: right; padding: 20px;">
+        <button id="theme-toggle" class="theme-switch-btn">🌙 Dark Mode</button>
+    </div>
+
+    <div class="login-container" style="max-width: 400px; margin: 40px auto; padding: 30px; border-radius: 8px;">
+        <h2 style="margin-top: 0; text-align: center;">Masuk Sistem IB</h2>
+
+        <?php if ($error) : ?>
+            <p class="error-msg" style="color: #ef4444; font-weight: bold; text-align: center;">Username atau password salah!</p>
         <?php endif; ?>
-        
-        <form action="" method="POST">
-            <div class="form-group">
-                <label>Username</label>
-                <input type="text" name="username" placeholder="Masukkan username" required autocomplete="off">
+
+        <form action="" method="post">
+            <div style="margin-bottom: 15px;">
+                <label for="username" style="display: block; margin-bottom: 5px; font-weight: 600;">Username</label>
+                <input type="text" name="username" id="username" required autocomplete="off">
             </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" name="password" placeholder="Masukkan password" required>
+
+            <div style="margin-bottom: 20px;">
+                <label for="password" style="display: block; margin-bottom: 5px; font-weight: 600;">Password</label>
+                <input type="password" name="password" id="password" required>
             </div>
-            <button type="submit" name="login" class="btn">Masuk</button>
+
+            <button type="submit" name="submit" style="width: 100%; padding: 12px; font-size: 16px;">Login</button>
         </form>
     </div>
+
+    <script src="assets/js/app.js"></script>
 </body>
 </html>

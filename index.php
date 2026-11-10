@@ -1,72 +1,84 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['login'])) {
+// Proteksi Sesi Ketat
+if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
     header("Location: login.php");
     exit;
 }
-require 'config/koneksi.php';
 
-$result = mysqli_query($conn, "SELECT * FROM investasi_barang ORDER BY id DESC");
+// Mekanisme Keamanan: Hancurkan cache agar tombol Back browser tidak mem-bypass login setelah logout
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
+require_once 'config/koneksi.php';
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Investasi</title>
+    <title>Dashboard - Aplikasi Investasi Barang</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h2>Dashboard Aplikasi Investasi Barang (IB)</h2>
-            <a href="logout.php" class="btn-danger">Logout</a>
-        </header>
 
-        <div style="margin-bottom: 20px;">
-            <a href="tambah.php" class="btn" style="width: auto;">+ Tambah Aset Baru</a>
+    <!-- Header Panel Utama -->
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; border-bottom: 1px solid var(--border-color);">
+        <h2 style="margin: 0; font-size: 22px;">Aplikasi Investasi Barang (IB)</h2>
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <span>Selamat Datang, <strong style="color: var(--primary-color);"><?php echo htmlspecialchars($_SESSION['user']); ?></strong></span>
+            <!-- Tombol Sakelar Tema -->
+            <button id="theme-toggle" class="theme-switch-btn">🌙 Dark Mode</button>
+            <a href="logout.php" style="color: #ef4444; font-weight: bold; text-decoration: none;">Keluar</a>
+        </div>
+    </header>
+
+    <!-- Papan Kendali Data CRUD -->
+    <main class="main-dashboard" style="margin: 30px; padding: 25px; border-radius: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <h3 style="margin: 0; font-size: 20px;">Daftar Aset Investasi Terdaftar</h3>
+            <a href="tambah.php" class="btn-primary" style="text-decoration: none; padding: 10px 18px; display: inline-block; border-radius: 6px;">➕ Tambah Barang</a>
         </div>
 
-        <table>
+        <table border="0" cellpadding="12" cellspacing="0" style="width: 100%; border-collapse: collapse; border: 1px solid var(--border-color);">
             <thead>
-                <tr>
-                    <th>Nama Barang</th>
+                <tr style="background-color: var(--toggle-btn-bg); border-bottom: 2px solid var(--border-color); text-align: left;">
+                    <th>ID</th>
+                    <th>Nama Aset</th>
                     <th>Kategori</th>
-                    <th>Harga Beli</th>
-                    <th>Harga Sekarang</th>
-                    <th>Estimasi Profit/Loss</th>
-                    <th>Aksi</th>
+                    <th>Nilai Investasi</th>
+                    <th style="text-align: center;">Aksi Operasional</th>
                 </tr>
             </thead>
             <tbody>
-                <?php if (mysqli_num_rows($result) == 0) : ?>
-                <tr>
-                    <td colspan="6" style="text-align: center; color: #9ca3af;">Belum ada data investasi. Klik tambah aset baru!</td>
-                </tr>
-                <?php endif; ?>
-                
-                <?php while ($row = mysqli_fetch_assoc($result)) : 
-                    $selisih = $row['harga_sekarang'] - $row['harga_beli'];
-                    $status_cuan = ($selisih >= 0) ? 'cuan' : 'btn-danger'; 
+                <?php
+                // Mengambil data barang langsung dari query database asli proyek
+                $query = "SELECT * FROM barang";
+                $result = mysqli_query($koneksi, $query);
+
+                if ($result && mysqli_num_rows($result) > 0) {
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        echo "<tr style='border-bottom: 1px solid var(--border-color);'>";
+                        echo "<td>" . $row['id'] . "</td>";
+                        echo "<td>" . htmlspecialchars($row['nama_barang']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['kategori']) . "</td>";
+                        echo "<td>Rp " . number_format($row['harga'], 0, ',', '.') . "</td>";
+                        echo "<td style='text-align: center;'>
+                                <a href='edit.php?id=" . $row['id'] . "' style='color: var(--primary-color); text-decoration: none; font-weight: 600;'>Edit</a> |
+                                <a href='hapus.php?id=" . $row['id'] . "' style='color: #ef4444; text-decoration: none; font-weight: 600;' onclick='return confirm(\"Yakin ingin menghapus data?\")'>Hapus</a>
+                              </td>";
+                        echo "</tr>";
+                    }
+                } else {
+                    echo "<tr><td colspan='5' style='text-align: center; color: var(--text-muted);'>Belum ada data barang di dalam database.</td></tr>";
+                }
                 ?>
-                <tr>
-                    <td><?= htmlspecialchars($row['nama_barang']); ?></td>
-                    <td><?= htmlspecialchars($row['kategori']); ?></td>
-                    <td>Rp <?= number_format($row['harga_beli'], 0, ',', '.'); ?></td>
-                    <td>Rp <?= number_format($row['harga_sekarang'], 0, ',', '.'); ?></td>
-                    <td class="<?= $status_cuan; ?>">
-                        <?= ($selisih >= 0) ? '+ Rp ' : '- Rp '; ?><?= number_format(abs($selisih), 0, ',', '.'); ?>
-                    </td>
-                    <td>
-                        <a href="edit.php?id=<?= $row['id']; ?>" class="btn" style="width: auto; padding: 5px 10px; font-size: 13px;">Edit</a> | 
-                        <a href="hapus.php?id=<?= $row['id']; ?>" class="btn-danger action-hapus">Hapus</a>
-                    </td>
-                </tr>
-                <?php endwhile; ?>
             </tbody>
         </table>
-    </div>
+    </main>
+
     <script src="assets/js/app.js"></script>
 </body>
 </html>

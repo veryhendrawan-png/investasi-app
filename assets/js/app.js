@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    
+
 
     const formTambah = document.getElementById('tambahForm');
     const formEdit = document.getElementById('editForm');
@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (hargaBeli < 0 || hargaSekarang < 0) {
             alert('Peringatan: Harga investasi tidak boleh bernilai minus!');
-            event.preventDefault(); 
+            event.preventDefault();
         }
     }
 
@@ -29,4 +29,36 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     });
+});
+
+// Aset JavaScript Modular - Sinkronisasi Tema Halaman
+document.addEventListener('DOMContentLoaded', () => {
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const currentTheme = localStorage.getItem('theme');
+
+    // 1. Cek preferensi tema sebelumnya di browser
+    if (currentTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        if (themeToggleBtn) themeToggleBtn.innerText = "☀️ Light Mode";
+    } else {
+        if (themeToggleBtn) themeToggleBtn.innerText = "🌙 Dark Mode";
+    }
+
+    // 2. Operasi klik sakelar tema (Berlaku global untuk semua halaman)
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+
+            let theme = 'light';
+            if (document.body.classList.contains('dark-mode')) {
+                theme = 'dark';
+                themeToggleBtn.innerText = "☀️ Light Mode";
+            } else {
+                themeToggleBtn.innerText = "🌙 Dark Mode";
+            }
+
+            // Simpan preferensi agar tema tetap konsisten saat berpindah halaman
+            localStorage.setItem('theme', theme);
+        });
+    }
 });

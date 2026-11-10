@@ -148,3 +148,90 @@ tr:hover {
     color: #4ade80;
     font-weight: bold;
 }
+
+/* ==========================================================================
+   VARIABEL WARNA GLOBAL (LIGHT MODE DEFAULT)
+   ========================================================================== */
+:root {
+    --bg-primary: #f4f6f9;
+    --bg-card: #ffffff;
+    --text-main: #333333;
+    --text-muted: #666666;
+    --border-color: #dddddd;
+    --primary-color: #3b82f6;
+    --primary-hover: #1d4ed8;
+    --toggle-btn-bg: #e5e7eb;
+}
+
+/* ==========================================================================
+   VARIABEL WARNA UNTUK DARK MODE
+   ========================================================================== */
+body.dark-mode {
+    --bg-primary: #111827;
+    --bg-card: #1f2937;
+    --text-main: #f9fafb;
+    --text-muted: #9ca3af;
+    --border-color: #374151;
+    --primary-color: #60a5fa;
+    --primary-hover: #3b82f6;
+    --toggle-btn-bg: #4b5563;
+}
+
+/* ==========================================================================
+   GAYA DASAR DAN TRANSISI VISUAL
+   ========================================================================== */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.theme-switch-btn {
+    background-color: var(--toggle-btn-bg);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.theme-switch-btn:hover {
+    opacity: 0.9;
+}
+
+.login-container, .main-dashboard {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+input[type="text"], input[type="password"] {
+    background-color: var(--bg-primary);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+button[type="submit"], .btn-primary {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button[type="submit"]:hover, .btn-primary:hover {
+    background-color: var(--primary-hover);
+}
